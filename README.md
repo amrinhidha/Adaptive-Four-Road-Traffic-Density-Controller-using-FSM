@@ -34,8 +34,7 @@ An FPGA-based Adaptive Traffic Density Controller designed using Verilog HDL and
 
 **Objective:** To develop an efficient and adaptive traffic signal control system that improves traffic flow by prioritizing roads according to vehicle density while incorporating emergency handling.
 
-**
-State diagram
-**
+**State Diagram**
+
 <img width="872" height="682" alt="image" src="https://github.com/user-attachments/assets/18a139a3-300a-4890-9103-437e1971740a" />
 
