@@ -5,31 +5,23 @@ module traffic_top #(
     input wire clk,
     input wire [15:0] sw,
     input wire [3:0] btn,
-
     output reg [15:0] led,
-
     output wire [3:0] D0_AN,
-    output wire [7:0] D0_SEG
-);
-
+    output wire [7:0] D0_SEG);
     wire [1:0] north, east, south, west;
     wire [1:0] selected_road, max_density;
     wire [1:0] last_served, current_road;
-
     wire one_sec_tick;
     wire [11:0] lights;
     wire [4:0] countdown;
-
     wire emergency_active;
     wire ped_request;
     wire pedestrian_walk;
     wire ped_clear;
     wire ped_button_press;
-
     // Reset synchronizer
     reg reset_sync1, reset_sync2;
     wire reset;
-
     always @(posedge clk or posedge btn[0]) begin
         if (btn[0]) begin
             reset_sync1 <= 1'b1;
@@ -40,7 +32,6 @@ module traffic_top #(
             reset_sync2 <= reset_sync1;
         end
     end
-
     assign reset = reset_sync2;
 
     // Density decoder
