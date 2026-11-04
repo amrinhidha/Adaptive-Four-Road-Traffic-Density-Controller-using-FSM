@@ -20,17 +20,17 @@ An FPGA-based Adaptive Traffic Density Controller designed using Verilog HDL and
 
 ## System Architecture
 
-Inputs
+**Inputs**
 
 The system takes its inputs from the board:
 
-Slide switches sw[7:0]: two switches per road set the traffic density, with 00 for none, 01 for medium, and 10 or 11 for heavy.
+**Slide switches sw[7:0]:** two switches per road set the traffic density, with 00 for none, 01 for medium, and 10 or 11 for heavy.
 
-btn[0]: reset.
+**btn[0]:** reset.
 
-btn[1]: pedestrian request.
+**btn[1]:** pedestrian request.
 
-btn[2]: emergency override.
+**btn[2]:** emergency override.
 
 ## **Modules**
 
@@ -85,8 +85,8 @@ Pedestrian module: synchronizes the pedestrian button, debounces it for 20 ms, d
 
 ## Schematic
 
+<img width="2550" height="3300" alt="schematic fsm_page-0001" src="https://github.com/user-attachments/assets/3cf623f9-c38d-496c-8c11-82d03abb61e9" />
 
-<img width="1275" height="1650" alt="schematic_page-0001" src="https://github.com/user-attachments/assets/d42a6e86-bd0c-4eb5-a26f-2b1547785b40" />
 
 
 
