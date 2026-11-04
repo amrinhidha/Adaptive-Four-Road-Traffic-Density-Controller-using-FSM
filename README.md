@@ -62,7 +62,8 @@ Seven-segment countdown module: converts the countdown value into two decimal di
 
 ## Input and Output
 
-<img width="673" height="418" alt="image" src="https://github.com/user-attachments/assets/82d118a3-bad4-445e-b930-7aae8f7916ac" />
+<img width="2260" height="1380" alt="top_level_io_table" src="https://github.com/user-attachments/assets/3c7a43ed-e140-49d9-85e3-e5c91e6fb564" />
+
 
 
 
