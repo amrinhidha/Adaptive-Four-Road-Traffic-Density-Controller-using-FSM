@@ -11,7 +11,7 @@ An FPGA-based Adaptive Traffic Density Controller designed using Verilog HDL and
 - **Emergency Handling:** Forces all traffic signals to RED when an emergency input is activated.
 - **LED-Based Visualization:** Displays traffic signal states using the FPGA board's onboard LEDs.
 
-## Traffic Signal Timing
+## Traffic Signal Timing 
 - Low Density – 5 seconds Green
 - Medium Density – 10 seconds Green
 - High Density – 15 seconds Green
