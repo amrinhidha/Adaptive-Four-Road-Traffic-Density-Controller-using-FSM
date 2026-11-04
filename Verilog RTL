@@ -137,48 +137,41 @@ if (reset) begin
 debounce_cnt <= 0;
 button_stable <= 1'b0;
 end
-
-        else if (button_sync2 == button_stable) begin
-            debounce_cnt <= 0;
-        end
-
-        else if (debounce_cnt == DEBOUNCE_LAST) begin
-            button_stable <= button_sync2;
-            debounce_cnt <= 0;
-        end
-        else begin
-            debounce_cnt <= debounce_cnt + 1'b1;
-        end
-    end
-    reg button_previous;
-    reg button_press_r;
-    always @(posedge clk or posedge reset) begin
-        if (reset) begin
-            button_previous <= 1'b0;
-            button_press_r <= 1'b0;
-        end
-        else begin
-            button_previous <= button_stable;
-            button_press_r <= button_stable & ~button_previous;
-        end
-    end
-    always @(posedge clk or posedge reset) begin
-
-        if (reset)
-            request_pending <= 1'b0;
-
-        else if (clear_request)
-            request_pending <= 1'b0;
-
-        else if (button_press_r)
-            request_pending <= 1'b1;
-    end
+else if (button_sync2 == button_stable) begin
+debounce_cnt <= 0;
+end
+else if (debounce_cnt == DEBOUNCE_LAST) begin
+button_stable <= button_sync2;
+debounce_cnt <= 0;
+end
+else begin
+debounce_cnt <= debounce_cnt + 1'b1;
+end
+end
+reg button_previous;
+reg button_press_r;
+always @(posedge clk or posedge reset) begin
+if (reset) begin
+button_previous <= 1'b0;
+button_press_r <= 1'b0;
+end
+else begin
+button_previous <= button_stable;
+button_press_r <= button_stable & ~button_previous;
+end
+end
+always @(posedge clk or posedge reset) begin
+if (reset)
+request_pending <= 1'b0;
+else if (clear_request)
+request_pending <= 1'b0;
+else if (button_press_r)
+request_pending <= 1'b1;
+end
 endmodule
 
 TRAFFIC FSM
-
 module traffic_fsm (
-
     input wire clk,
     input wire reset,
     input wire one_sec_tick,
@@ -191,224 +184,194 @@ module traffic_fsm (
     output reg [1:0] current_road,
     output wire ped_clear,
     output wire pedestrian_walk,
-    output wire [4:0] countdown
-);
-
+    output wire [4:0] countdown);
     // FSM states
-    localparam ALL_RED = 2'b00;
-    localparam GREEN   = 2'b01;
-    localparam YELLOW  = 2'b10;
-    reg [1:0] state;
-    reg [4:0] timer_count;
-    reg ped_walk_active;
-    reg ped_clear_r;
-    assign countdown = timer_count;
-    assign ped_clear = ped_clear_r;
-    assign pedestrian_walk = ped_walk_active;
-    // Adaptive green duration
-    function [4:0] green_duration;
-        input [1:0] density;
-        begin
-            case (density)
-                2'b00: green_duration = 5'd5;
-                2'b01: green_duration = 5'd10;
-                default: green_duration = 5'd15;
-            endcase
-        end
-    endfunction
-
-    // FSM sequential logic
-    always @(posedge clk or posedge reset) begin
-
-        if (reset) begin
-            state <= ALL_RED;
-            timer_count <= 5'd1;
-            current_road <= 2'b00;
-            last_served <= 2'b11;
-            ped_walk_active <= 1'b0;
-            ped_clear_r <= 1'b0;
-        end
-        else begin
-        // One-clock-cycle pedestrian clear pulse
-            ped_clear_r <= 1'b0;
-
-            // Emergency override
-            if (emergency) begin
-                state <= ALL_RED;
-                timer_count <= 5'd1;
-                ped_walk_active <= 1'b0;
-                ped_clear_r <= 1'b0;
-            end
-            else if (one_sec_tick) begin
-                case (state)
-                    // ALL RED
-                    ALL_RED: begin
-
-                        if (timer_count > 1) begin
-                            timer_count <= timer_count - 1'b1;
-                        end
-
-                        else if (ped_request && !ped_walk_active) begin
-                            ped_walk_active <= 1'b1;
-                            ped_clear_r <= 1'b1;
-                            timer_count <= 5'd10;
-                        end
-
-                        else if (ped_walk_active) begin
-                            ped_walk_active <= 1'b0;
-                            timer_count <= 5'd1;
-                            state <= ALL_RED;
-                        end
-                        else begin
-                            current_road <= selected_road;
-                            timer_count <= green_duration(max_density);
-                            state <= GREEN;
-                        end
-                    end
-
-                    // GREEN
-                    GREEN: begin
-
-                        if (timer_count > 1) begin
-                            timer_count <= timer_count - 1'b1;
-                        end
-
-                        else begin
-                            timer_count <= 5'd3;
-                            last_served <= current_road;
-                            state <= YELLOW;
-                        end
-                    end
-                    // YELLOW
-                    YELLOW: begin
-
-                        if (timer_count > 1) begin
-                            timer_count <= timer_count - 1'b1;
-                        end
-                        else begin
-                            timer_count <= 5'd1;
-                            state <= ALL_RED;
-                        end
-                    end
-
-                    default: begin
-                        state <= ALL_RED;
-                        timer_count <= 5'd1;
-                        ped_walk_active <= 1'b0;
-                        ped_clear_r <= 1'b0;
-                   end
-                endcase
-            end
-        end
-    end
-    // Moore output logic
-    // Each road: {Red, Yellow, Green}
-    // Red = 100, Yellow = 010, Green = 001
-
-    always @(*) begin
-        // All roads RED
-        lights = 12'b100_100_100_100;
-
-        if (!emergency) begin
-            case (state)
-                GREEN: begin
-                    case (current_road)
-                        2'b00: lights[2:0] = 3'b001;
-                        2'b01: lights[5:3] = 3'b001;
-                        2'b10: lights[8:6] = 3'b001;
-                        2'b11: lights[11:9] = 3'b001;
-                    endcase
-                end
-                YELLOW: begin
-                    case (current_road)
-                        2'b00: lights[2:0] = 3'b010;
-                        2'b01: lights[5:3] = 3'b010;
-                        2'b10: lights[8:6] = 3'b010;
-                        2'b11: lights[11:9] = 3'b010;
-                    endcase
-                end
-                default: begin
-                    lights = 12'b100_100_100_100;
-                end
-            endcase
-        end
-    end
+localparam ALL_RED = 2'b00;
+localparam GREEN   = 2'b01;
+localparam YELLOW  = 2'b10;
+reg [1:0] state;
+reg [4:0] timer_count;
+reg ped_walk_active;
+reg ped_clear_r;
+assign countdown = timer_count;
+assign ped_clear = ped_clear_r;
+assign pedestrian_walk = ped_walk_active;
+// Adaptive green duration
+function [4:0] green_duration;
+input [1:0] density;
+begin
+case (density)
+2'b00: green_duration = 5'd5;
+2'b01: green_duration = 5'd10;
+default: green_duration = 5'd15;
+endcase
+end
+endfunction
+// FSM sequential logic
+always @(posedge clk or posedge reset) begin
+if (reset) begin
+state <= ALL_RED;
+timer_count <= 5'd1;
+current_road <= 2'b00;
+last_served <= 2'b11;
+ped_walk_active <= 1'b0;
+ped_clear_r <= 1'b0;
+end
+else begin
+// One-clock-cycle pedestrian clear pulse
+ped_clear_r <= 1'b0;
+// Emergency override
+if (emergency) begin
+state <= ALL_RED;
+timer_count <= 5'd1;
+ped_walk_active <= 1'b0;
+ped_clear_r <= 1'b0;
+end
+else if (one_sec_tick) begin
+case (state)
+// ALL RED
+ALL_RED: begin
+if (timer_count > 1) begin
+timer_count <= timer_count - 1'b1;
+end
+else if (ped_request && !ped_walk_active) begin
+ped_walk_active <= 1'b1;
+ped_clear_r <= 1'b1;
+timer_count <= 5'd10;
+end
+else if (ped_walk_active) begin
+ped_walk_active <= 1'b0;
+timer_count <= 5'd1;
+state <= ALL_RED;
+end
+else begin
+current_road <= selected_road;
+timer_count <= green_duration(max_density);
+state <= GREEN;
+end
+end
+// GREEN
+GREEN: begin
+if (timer_count > 1) begin
+timer_count <= timer_count - 1'b1;
+end
+else begin
+timer_count <= 5'd3;
+last_served <= current_road;
+state <= YELLOW;
+end
+end
+// YELLOW
+YELLOW: begin
+if (timer_count > 1) begin
+timer_count <= timer_count - 1'b1;
+end
+else begin
+timer_count <= 5'd1;
+state <= ALL_RED;
+end
+end
+default: begin
+state <= ALL_RED;
+timer_count <= 5'd1;
+ped_walk_active <= 1'b0;
+ped_clear_r <= 1'b0;
+end
+endcase
+end
+end
+end
+// Moore output logic
+// Each road: {Red, Yellow, Green}
+// Red = 100, Yellow = 010, Green = 001
+always @(*) begin
+// All roads RED
+lights = 12'b100_100_100_100;
+if (!emergency) begin
+case (state)
+GREEN: begin
+case (current_road)
+2'b00: lights[2:0] = 3'b001;
+2'b01: lights[5:3] = 3'b001;
+2'b10: lights[8:6] = 3'b001;
+2'b11: lights[11:9] = 3'b001;
+endcase
+end
+YELLOW: begin
+ case (current_road)
+ 2'b00: lights[2:0] = 3'b010;
+2'b01: lights[5:3] = 3'b010;
+2'b10: lights[8:6] = 3'b010;
+ 2'b11: lights[11:9] = 3'b010;
+endcase
+end
+default: begin
+lights = 12'b100_100_100_100;
+end
+endcase
+end
+end
 endmodule
 
 SEVEN SEGMENT 
-
 module seven_seg_countdown #(
-    parameter integer CLK_FREQ = 100_000_000
-)(
-    input wire clk,
-    input wire reset,
-    input wire [4:0] countdown,
-
-    output reg [3:0] an,
-    output reg [7:0] seg
-);
-    // Binary to decimal conversion
-    reg [3:0] tens;
-    reg [3:0] ones;
-
-    always @(*) begin
-        case (countdown)
-            5'd0:  begin tens = 0; ones = 0; end
-            5'd1:  begin tens = 0; ones = 1; end
-            5'd2:  begin tens = 0; ones = 2; end
-            5'd3:  begin tens = 0; ones = 3; end
-            5'd4:  begin tens = 0; ones = 4; end
-            5'd5:  begin tens = 0; ones = 5; end
-            5'd6:  begin tens = 0; ones = 6; end
-            5'd7:  begin tens = 0; ones = 7; end
-            5'd8:  begin tens = 0; ones = 8; end
-            5'd9:  begin tens = 0; ones = 9; end
-            5'd10: begin tens = 1; ones = 0; end
-            5'd11: begin tens = 1; ones = 1; end
-            5'd12: begin tens = 1; ones = 2; end
-            5'd13: begin tens = 1; ones = 3; end
-            5'd14: begin tens = 1; ones = 4; end
-            default: begin
-                tens = 1;
-                ones = 5;
-            end
-        endcase
-    end
-
-    // Display refresh
-    // 2 kHz digit switching, 1 kHz per digit
-
-    localparam integer REFRESH_DIV = CLK_FREQ / 2000;
-    localparam integer REFRESH_W =
-        (REFRESH_DIV <= 1) ? 1 : $clog2(REFRESH_DIV);
-
-    reg [REFRESH_W-1:0] refresh_cnt;
-    reg digit_sel;
-    always @(posedge clk or posedge reset) begin
-
-        if (reset) begin
-            refresh_cnt <= 0;
-            digit_sel <= 1'b0;
-        end
-        else if (refresh_cnt == REFRESH_DIV - 1) begin
-            refresh_cnt <= 0;
-            digit_sel <= ~digit_sel;
-        end
-        else begin
-            refresh_cnt <= refresh_cnt + 1'b1;
-        end
-    end
-    // Active-low digit selection
-    always @(*) begin
-        an = 4'b1111;
-        if (digit_sel == 1'b0)
+    parameter integer CLK_FREQ = 100_000_000)
+(input wire clk,
+ input wire reset,
+ input wire [4:0] countdown,
+ output reg [3:0] an,
+ output reg [7:0] seg);
+reg [3:0] tens;
+reg [3:0] ones;
+always @(*) begin
+case (countdown)
+5'd0:  begin tens = 0; ones = 0; end
+5'd1:  begin tens = 0; ones = 1; end
+5'd2:  begin tens = 0; ones = 2; end
+5'd3:  begin tens = 0; ones = 3; end
+5'd4:  begin tens = 0; ones = 4; end
+5'd5:  begin tens = 0; ones = 5; end
+5'd6:  begin tens = 0; ones = 6; end
+5'd7:  begin tens = 0; ones = 7; end
+5'd8:  begin tens = 0; ones = 8; end
+5'd9:  begin tens = 0; ones = 9; end
+5'd10: begin tens = 1; ones = 0; end
+5'd11: begin tens = 1; ones = 1; end
+5'd12: begin tens = 1; ones = 2; end
+5'd13: begin tens = 1; ones = 3; end
+5'd14: begin tens = 1; ones = 4; end
+default: begin
+tens = 1;
+ones = 5;
+end
+endcase
+end
+localparam integer REFRESH_DIV = CLK_FREQ / 2000;
+localparam integer REFRESH_W =
+(REFRESH_DIV <= 1) ? 1 : $clog2(REFRESH_DIV);
+reg [REFRESH_W-1:0] refresh_cnt;
+reg digit_sel;
+always @(posedge clk or posedge reset) begin
+if (reset) begin
+refresh_cnt <= 0;
+digit_sel <= 1'b0;
+end
+else if (refresh_cnt == REFRESH_DIV - 1) begin
+refresh_cnt <= 0;
+digit_sel <= ~digit_sel;
+end
+else begin
+refresh_cnt <= refresh_cnt + 1'b1;
+end
+end
+always @(*) begin
+an = 4'b1111;
+if (digit_sel == 1'b0)
             an[0] = 1'b0;
         else
             an[1] = 1'b0;
     end
 
-    // Seven-segment decoder
-    // Pattern order: {G,F,E,D,C,B,A}
     reg [6:0] pattern;
     always @(*) begin
         if (digit_sel == 1'b0) begin
@@ -434,9 +397,7 @@ module seven_seg_countdown #(
             endcase
         end
     end
-    // Final segment output
-    // seg[7] = DP
-    // seg[6:0] = G,F,E,D,C,B,A
+   
     always @(*) begin
         seg = 8'b11111111;
         seg[6:0] = pattern;
