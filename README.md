@@ -37,4 +37,5 @@ An FPGA-based Adaptive Traffic Density Controller designed using Verilog HDL and
 **
 State diagram
 **
-<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/7c3fc363-5bc5-412b-82fb-a2c5b9919777" />
+<img width="872" height="682" alt="image" src="https://github.com/user-attachments/assets/18a139a3-300a-4890-9103-437e1971740a" />
+
