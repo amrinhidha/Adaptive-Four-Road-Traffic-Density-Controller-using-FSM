@@ -1,20 +1,16 @@
 PEDESTRIAN
-module pedestrian #(CLK_FREQ, DEBOUNCE_MS )
-parameter integer CLK_FREQ = 100_000_000;
-parameter integer DEBOUNCE_MS = 20;
-
+module pedestrian #(
+parameter integer CLK_FREQ = 100_000_000,
+parameter integer DEBOUNCE_MS = 20)
 ( input wire clk,
   input wire reset,
   input wire ped_button,
   input wire clear_request,
   output reg request_pending,
   output wire ped_button_press);
-localparam integer DEBOUNCE_LIMIT =
-(CLK_FREQ / 1000) * DEBOUNCE_MS;
-localparam integer CNT_WIDTH =
-(DEBOUNCE_LIMIT <= 1) ? 1 : $clog2(DEBOUNCE_LIMIT);
-localparam [CNT_WIDTH-1:0] DEBOUNCE_LAST =
-DEBOUNCE_LIMIT - 1;
+localparam integer DEBOUNCE_LIMIT = (CLK_FREQ / 1000) * DEBOUNCE_MS;
+localparam integer CNT_WIDTH = (DEBOUNCE_LIMIT <= 1) ? 1 : $clog2(DEBOUNCE_LIMIT);
+localparam [CNT_WIDTH-1:0] DEBOUNCE_LAST = DEBOUNCE_LIMIT - 1;
 reg button_sync1;
 reg button_sync2;
 always @(posedge clk or posedge reset) begin
