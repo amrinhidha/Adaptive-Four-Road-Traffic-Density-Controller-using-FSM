@@ -18,7 +18,7 @@ An FPGA-based Adaptive Traffic Density Controller designed using Verilog HDL and
 - Yellow Signal – 3 seconds
 - All-Red Interval – 1 second
 
-**System Architecture**
+## System Architecture**
 
 Inputs
 
@@ -29,7 +29,7 @@ btn[0]: reset.
 btn[1]: pedestrian request.
 btn[2]: emergency override.
 
-**Modules**
+## **Modules**
 
 Density module: splits the 8 switch bits into four 2-bit density values, one for each road.
 
