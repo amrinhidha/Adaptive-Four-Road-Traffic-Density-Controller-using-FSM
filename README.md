@@ -67,19 +67,22 @@ Seven-segment countdown module: converts the countdown value into two decimal di
 
 
 
-**State Diagram**
+## State Diagram
+
 
 
 <img width="930" height="580" alt="image" src="https://github.com/user-attachments/assets/a3444830-4195-4423-a285-743b2be3b8cc" />
 
 
 
-**State transition**
+## State transition
+
 
 <img width="866" height="666" alt="image" src="https://github.com/user-attachments/assets/034033d4-7e1d-45dc-bdbb-7c67da69fb8b" />
 
 
 ## Conclusion
+
 This project implemented an Adaptive Traffic Density Controller in Verilog for a Spartan-7 FPGA. It sets the green time of each road from its traffic density (5, 10 or 15 seconds) and rotates priority so that no road is starved. A three-state FSM (ALL_RED, GREEN, YELLOW) controls the lights and handles pedestrian requests and an emergency override, while a seven-segment display shows the countdown. The design is modular, and it can be extended with real vehicle sensors, more density levels or more roads.
 
 
