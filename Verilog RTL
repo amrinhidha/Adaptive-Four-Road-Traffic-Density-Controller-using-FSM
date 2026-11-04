@@ -367,40 +367,38 @@ end
 always @(*) begin
 an = 4'b1111;
 if (digit_sel == 1'b0)
-            an[0] = 1'b0;
-        else
-            an[1] = 1'b0;
-    end
-
-    reg [6:0] pattern;
-    always @(*) begin
-        if (digit_sel == 1'b0) begin
-            case (ones)
-                4'd0: pattern = 7'b1000000;
-                4'd1: pattern = 7'b1111001;
-                4'd2: pattern = 7'b0100100;
-                4'd3: pattern = 7'b0110000;
-                4'd4: pattern = 7'b0011001;
-                4'd5: pattern = 7'b0010010;
-                4'd6: pattern = 7'b0000010;
-                4'd7: pattern = 7'b1111000;
-                4'd8: pattern = 7'b0000000;
-                4'd9: pattern = 7'b0010000;
-               default: pattern = 7'b1111111;
-            endcase
-        end
-        else begin
-            case (tens)
-                4'd0: pattern = 7'b1000000;
-                4'd1: pattern = 7'b1111001;
-                default: pattern = 7'b1111111;
-            endcase
-        end
-    end
-   
-    always @(*) begin
-        seg = 8'b11111111;
-        seg[6:0] = pattern;
-    end
+an[0] = 1'b0;
+else
+an[1] = 1'b0;
+end
+reg [6:0] pattern;
+always @(*) begin
+if (digit_sel == 1'b0) begin
+case (ones)
+4'd0: pattern = 7'b1000000;
+4'd1: pattern = 7'b1111001;
+4'd2: pattern = 7'b0100100;
+4'd3: pattern = 7'b0110000;
+4'd4: pattern = 7'b0011001;
+4'd5: pattern = 7'b0010010;
+4'd6: pattern = 7'b0000010;
+4'd7: pattern = 7'b1111000;
+4'd8: pattern = 7'b0000000;
+4'd9: pattern = 7'b0010000;
+default: pattern = 7'b1111111;
+endcase
+end
+else begin
+case (tens)
+4'd0: pattern = 7'b1000000;
+4'd1: pattern = 7'b1111001;
+default: pattern = 7'b1111111;
+endcase
+end
+end
+always @(*) begin
+seg = 8'b11111111;
+seg[6:0] = pattern;
+end
 endmodule
 
