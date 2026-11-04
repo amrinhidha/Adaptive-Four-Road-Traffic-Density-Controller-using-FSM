@@ -25,8 +25,11 @@ Inputs
 The system takes its inputs from the board:
 
 Slide switches sw[7:0]: two switches per road set the traffic density, with 00 for none, 01 for medium, and 10 or 11 for heavy.
+
 btn[0]: reset.
+
 btn[1]: pedestrian request.
+
 btn[2]: emergency override.
 
 ## **Modules**
