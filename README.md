@@ -18,7 +18,7 @@ An FPGA-based Adaptive Traffic Density Controller designed using Verilog HDL and
 - Yellow Signal – 3 seconds
 - All-Red Interval – 1 second
 
-## System Architecture**
+## System Architecture
 
 Inputs
 
