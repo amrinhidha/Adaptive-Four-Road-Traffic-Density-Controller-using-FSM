@@ -32,11 +32,16 @@ btn[2]: emergency override.
 **Modules**
 
 Density module: splits the 8 switch bits into four 2-bit density values, one for each road.
+
 Priority module: takes those four densities and picks which road gets the next green. It treats any density of 2 or 3 as “heavy” and searches for the busiest road, starting just after the road served last. When two roads have the same density, the turn rotates between them instead of always favoring North. It outputs the selected road and its density.
+
 Timer module: divides the 100 MHz clock down to a single pulse every second, called one_sec_tick. The FSM uses it as its time base.
+
 Emergency module: passes the emergency button through a two-flip-flop synchronizer so that the asynchronous button press is safe to use in the clocked logic.
 Pedestrian module: synchronizes the pedestrian button, debounces it for 20 ms, detects the press edge, and latches a pending request. The request stays pending until the FSM clears it.
+
 Traffic FSM: the controller at the center of the design. It has three states: ALL_RED, GREEN and YELLOW. It reads the tick, the selected road and density, the pedestrian request and the emergency signal. It outputs the 12-bit light pattern, the current road, the last served road, the walk signal, a pedestrian-clear pulse, and a 5-bit countdown.
+
 Seven-segment countdown module: converts the countdown value into two decimal digits and shows them on the display by switching between the digits at 2 kHz.
 
 ## Technologies Used
